@@ -25,17 +25,17 @@ class inputter:
 		self.pad_value = pad_value
 		self.num_split = num_split
 		for file in files:
-			if re.search(r'test\.csv',file):
+			if re.search(r'test\.*',file):
 				self.testFile = file
-				print "Test file read: "+file
+				print( "Test file read: "+file)
 				self.extractWindowOverlap(file)
-			elif re.search(r'train\.csv',file):
+			elif re.search(r'train\.*',file):
 				self.trainFile = file
-				print "Train file read: " + file
+				print( "Train file read: " + file)
 				self.extractWindowOverlap(file)
-			elif re.search(r'validation\.csv',file):
+			elif re.search(r'validation\.*',file):
 				self.validationFile = file
-				print "Validation file read: "+file
+				print( "Validation file read: "+file)
 				self.extractWindowOverlap(file)
 		#assert(self.trainFile), "Training file not found, check Glob passed"
 		#assert(self.validationFile)	, "Validation file not found, check Glob passed"
@@ -157,7 +157,8 @@ def inputWindowedData(filePath,windowSize,mergeAttackLabelsWithAtleast=False):
 		validCsv = csv.reader(file, delimiter = '\t')
 		for row in validCsv:
 			if windowLocation < windowSize:
-				datarow = np.array(map(np.float32 , row[1:]))
+				#datarow = np.array(map(np.float32 , row[1:]))
+				datarow = np.array([float(i) for i in row[1:]])
 				#import pdb
 				#pdb.set_trace()
 				labelrow = int(float(row[0]))
@@ -229,7 +230,7 @@ def check_pad_condition(data, pad_value):
 			if element == pad_value:
 				count += 1
                 
-	print "Number of {} in data: {}".format(pad_value, count)
+	print( "Number of {} in data: {}".format(pad_value, count))
 
 def get_pad_idx(label_unpad, Maxlen):
 
@@ -301,8 +302,8 @@ class Get_data(object):
 		inputX = inputX.reshape(inputX.shape[0],inputX.shape[1],inputX.shape[2])
 		input_mask = create_mask(input_pad_idx, self.maxlen)
 	
-		print data_type + " data shape", inputX.shape, inputY.shape, input_pad_idx.shape
-		print data_type + " mask", input_mask.shape
+		print( data_type + " data shape", inputX.shape, inputY.shape, input_pad_idx.shape)
+		print( data_type + " mask", input_mask.shape)
 
 		return inputX, inputY, input_pad_idx, input_mask
 
@@ -314,7 +315,7 @@ class Fixed_seq(Get_data):
 		inputX, inputY = getattr(self.inp, method_name)(mergeAttackLabelsWithAtleast=SlidingAttackLabel)	
 		inputX = inputX.reshape(inputX.shape[0],inputX.shape[1],inputX.shape[2])
 
-		print data_type + " data shape", inputX.shape, inputY.shape
+		print( data_type + " data shape", inputX.shape, inputY.shape)
 
 		return inputX, inputY
 
@@ -327,7 +328,7 @@ class Fixed_seq(Get_data):
 		inputX = data[ data_type + '_x']	
 		inputY = data[ data_type + '_y']	
 
-		print data_type + " data shape", inputX.shape, inputY.shape
+		print( data_type + " data shape", inputX.shape, inputY.shape)
 
 		return inputX, inputY
 
