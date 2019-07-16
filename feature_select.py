@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
-
+from slidewindow import *
+from shuffle_data import *
+from L2_normalization import *
+import pdb
 
 Wednesday_path = '/home/cuc/CrossFire-Detect/CrossFire-Detect/data/cicids/new_features/pro-Wednesday-0.5v2.csv'
 Wednesday = pd.read_csv(Wednesday_path ,sep=",")
@@ -67,15 +70,50 @@ all_train_reduced = pd.concat([Monday, Tuesday_reduced, Wednesday_reduced], axis
 all_valid_reduced = pd.concat([Thursday_reduced], axis = 0)
 all_test_reduced = pd.concat([Friday_reduced], axis = 0)
 
+
 features_select = ['num_label', 'NumPkts', 'NumBytes', 'PktSizeAvg', 'PktSizeStd', 'NumACK', 'ULNumPkts', 'ULNumBytes', 'ULNumACK', 'DLNumPkts', 'DLNumBytes', 'DLPktSizeAvg', 'DLPktSizeStd', 'DLNumUniIPAddr', 'DLNumACK', 'DLPktSizeP25', 'PktSizeP75', 'DLPktSizeP75', 'ULnumActiveFlows', 'DLnumActiveFlows']
 
 alltrainreduced_select_new = clean_data(all_train_reduced)[features_select]
 allvalidreduced_select_new = clean_data(all_valid_reduced)[features_select]
 alltestreduced_select_new = clean_data(all_test_reduced)[features_select]
 
-alltrainreduced_select_new.to_csv('allreducedselect_w10o0_train.csv', 
-                             sep=',', index = False, header = False)
-alltestreduced_select_new.to_csv('allreducedselect_w10o0_test.csv', 
-                             sep=',', index = False, header = False)
-allvalidreduced_select_new.to_csv('allreducedselect_w10o0_validation.csv', 
-                             sep=',', index = False, header = False)
+#pdb.set_trace()
+
+raw_labels_train =  all_train_reduced[['Label']].values
+raw_labels_valid =  all_valid_reduced[['Label']].values
+raw_labels_test =  all_test_reduced[['Label']].values
+
+#alltrainreduced_select_new.to_csv('allreducedselect_w10o0_train.csv', 
+#                             sep=',', index = False, header = False)
+#alltestreduced_select_new.to_csv('allreducedselect_w10o0_test.csv', 
+#                             sep=',', index = False, header = False)
+#allvalidreduced_select_new.to_csv('allreducedselect_w10o0_validation.csv', 
+#                             sep=',', index = False, header = False)
+
+#raw_labels_train.to_csv('allreducedselect_rawlabels_train.csv', 
+#                             sep='\t', index = False, header = False)
+#raw_labels_test.to_csv('allreducedselect_rawlabels_test.csv', 
+#                             sep='\t', index = False, header = False)
+#raw_labels_valid.to_csv('allreducedselect_rawlabels_validation.csv', 
+#                             sep='\t', index = False, header = False)
+
+normed_train = store_normed(alltrainreduced_select_new)
+normed_valid = store_normed(allvalidreduced_select_new)
+normed_test = store_normed (alltestreduced_select_new )
+#pdb.set_trace()
+
+slide_train = create_windows(normed_train, 10, 9) 
+slide_valid = create_windows(normed_valid, 10, 9) 
+slide_test = create_windows(normed_test, 10, 9) 
+
+slide_string_labels_train = create_windows_raw_label(raw_labels_train, 10, 9) 
+slide_string_labels_valid = create_windows_raw_label(raw_labels_valid, 10, 9) 
+slide_string_labels_test = create_windows_raw_label(raw_labels_test, 10, 9) 
+
+print ('\n shuffling...')
+
+
+Shuffle(slide_string_labels_train, slide_string_labels_valid, slide_string_labels_test).output_attack_idx()
+Shuffle(slide_train, slide_valid, slide_test).output_data()
+
+

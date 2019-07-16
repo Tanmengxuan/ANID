@@ -4,7 +4,7 @@ import argparse
 import gc
 import csv
 import yaml
-
+import pdb
 
 parser = argparse.ArgumentParser()
 
@@ -21,9 +21,11 @@ args = parser.parse_args()
 
 
 
-def create_windows(fileName, window_size, overlap, prefix):
+#def create_windows(fileName, window_size, overlap, prefix):
+def create_windows(fileName, window_size, overlap):
 	print( "Reading data")
-	origData = np.loadtxt(fileName,delimiter='\t', dtype =np.float32)
+	#origData = np.loadtxt(fileName,delimiter='\t', dtype =np.float32)
+	origData = fileName 
 	startIndex=0
 	endIndex = window_size
 	windows_list = []
@@ -40,17 +42,22 @@ def create_windows(fileName, window_size, overlap, prefix):
 	np_windowed = np.array(windows_list)
 	del windows_list
 	gc.collect()
-
-	np_windowed = np_windowed.reshape(-1, np_windowed.shape[2])
+	
+	#pdb.set_trace()
+	#np_windowed = np_windowed.reshape(-1, np_windowed.shape[2])
 	#np_windowed = np_windowed.reshape(-1, 1)
-	save_path = os.path.join(os.path.dirname(fileName),'normed_allreducedselect'+'_w'+str(window_size)+'o'+str(overlap)+ '_' + prefix + ".csv")
+	#save_path = os.path.join(os.path.dirname(fileName),'normed_allreducedselect'+'_w'+str(window_size)+'o'+str(overlap)+ '_' + prefix + ".csv")
 	#np.savetxt(save_path,np_windowed,delimiter='\t',fmt='%f')
-	np.savetxt(save_path,np_windowed,delimiter='\t',fmt='%s')
-	print ('saved to: ', save_path) 
+	#np.savetxt(save_path,np_windowed,delimiter='\t',fmt='%s')
+	#print ('saved to: ', save_path) 
+	return np_windowed
 
-def create_windows_raw_label(fileName, window_size, overlap, prefix):
+#def create_windows_raw_label(fileName, window_size, overlap, prefix):
+def create_windows_raw_label(fileName, window_size, overlap):
 	print( "Reading data")
-	origData = np.loadtxt(fileName,delimiter='\t', dtype =str)
+	#origData = np.loadtxt(fileName,delimiter='\t', dtype =str)
+	origData = fileName 
+	#pdb.set_trace()
 	startIndex=0
 	endIndex = window_size
 	windows_list = []
@@ -68,19 +75,22 @@ def create_windows_raw_label(fileName, window_size, overlap, prefix):
 	del windows_list
 	gc.collect()
 
-	np_windowed = np_windowed.reshape(np_windowed.shape[0],np_windowed.shape[1],  1)
-	save_path = os.path.join(os.path.dirname(fileName),'normed_allreducedselect_labels'+'_w'+str(window_size)+'o'+str(overlap)+ '_' + prefix + ".yml")
-	fp = yaml.dump({'label':np_windowed})
-	open(save_path, 'w').write(fp)
-	print ('saved to: ', save_path) 
+	np_windowed = np_windowed.reshape(np_windowed.shape[0],np_windowed.shape[1],  1) #convert to 3d array
+	#save_path = os.path.join(os.path.dirname(fileName),'normed_allreducedselect_labels'+'_w'+str(window_size)+'o'+str(overlap)+ '_' + prefix + ".yml")
+	#fp = yaml.dump({'label':np_windowed})
+	#open(save_path, 'w').write(fp)
+	#print ('saved to: ', save_path) 
 
-if __name__ == '__main__':
+	return np_windowed
 
-	if args.raw_label:
-		
-		create_windows_raw_label(args.path, args.window, args.overlap, args.name)
-	else:
 
-		create_windows(args.path, args.window, args.overlap, args.name)
+#if __name__ == '__main__':
+#
+#	if args.raw_label:
+#		
+#		create_windows_raw_label(args.path, args.window, args.overlap, args.name)
+#	else:
+#
+#		create_windows(args.path, args.window, args.overlap, args.name)
 	
 
