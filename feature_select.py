@@ -83,20 +83,6 @@ raw_labels_train =  all_train_reduced[['Label']].values
 raw_labels_valid =  all_valid_reduced[['Label']].values
 raw_labels_test =  all_test_reduced[['Label']].values
 
-#alltrainreduced_select_new.to_csv('allreducedselect_w10o0_train.csv', 
-#                             sep=',', index = False, header = False)
-#alltestreduced_select_new.to_csv('allreducedselect_w10o0_test.csv', 
-#                             sep=',', index = False, header = False)
-#allvalidreduced_select_new.to_csv('allreducedselect_w10o0_validation.csv', 
-#                             sep=',', index = False, header = False)
-
-#raw_labels_train.to_csv('allreducedselect_rawlabels_train.csv', 
-#                             sep='\t', index = False, header = False)
-#raw_labels_test.to_csv('allreducedselect_rawlabels_test.csv', 
-#                             sep='\t', index = False, header = False)
-#raw_labels_valid.to_csv('allreducedselect_rawlabels_validation.csv', 
-#                             sep='\t', index = False, header = False)
-
 normed_train = store_normed(alltrainreduced_select_new)
 normed_valid = store_normed(allvalidreduced_select_new)
 normed_test = store_normed (alltestreduced_select_new )
@@ -111,7 +97,6 @@ slide_string_labels_valid = create_windows_raw_label(raw_labels_valid, 10, 9)
 slide_string_labels_test = create_windows_raw_label(raw_labels_test, 10, 9) 
 
 print ('\n shuffling...')
-
 
 Shuffle(slide_string_labels_train, slide_string_labels_valid, slide_string_labels_test).output_attack_idx()
 Shuffle(slide_train, slide_valid, slide_test).output_data()
