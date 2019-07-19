@@ -26,11 +26,15 @@ def get_attack_idx (attack_type_list, test_label_raw):
 
 class Shuffle(object):
 
-	def __init__(self, train, valid, test):
+	#def __init__(self, train, valid, test):
+	#	
+	#	self.train = train
+	#	self.valid = valid
+	#	self.test = test
+
+	def __init__(self, data):
 		
-		self.train = train
-		self.valid = valid
-		self.test = test
+		self.data = data 
 	
 	def shuffle(self, data):
 
@@ -93,7 +97,7 @@ class Shuffle(object):
 		botnet_idx = self.get_attack_idx(botnet, shuffled_data)
 		benign_idx = self.get_attack_idx(benign, shuffled_data)
 
-		save_path = name + '_allattack_idx.h5'
+		save_path = name + '_new_allattack_idx.h5'
 		hf = h5py.File(save_path, 'w')
 		hf.create_dataset('dos', data = dos_idx)
 		hf.create_dataset('ddos', data = ddos_idx)
@@ -114,7 +118,7 @@ class Shuffle(object):
 
 		dataX = data[:, :, 1:]
 		#pdb.set_trace()
-		save_path = 'normed_allreducedselect_final_w10o9_{}.h5'.format(name)
+		save_path = 'normed_new_allreducedselect_final_w10o9_{}.h5'.format(name)
 		hf = h5py.File(save_path, 'w')
 		hf.create_dataset('data', data = dataX)
 		hf.create_dataset('label', data = dataY)
@@ -125,18 +129,18 @@ class Shuffle(object):
 
 	def output_attack_idx(self):
 
-		data = np.concatenate((self.train, self.valid, self.test), axis = 0)
+		#data = np.concatenate((self.train, self.valid, self.test), axis = 0)
 
-		train, valid, test = self.shuffle(data)
+		train, valid, test = self.shuffle(self.data)
 		self.save_attack_idx(train, 'train')
 		self.save_attack_idx(valid, 'validation')
 		self.save_attack_idx(test, 'test')
 
 	def output_data(self):
 
-		data = np.concatenate((self.train, self.valid, self.test), axis = 0)
+		#data = np.concatenate((self.train, self.valid, self.test), axis = 0)
 
-		train, valid, test = self.shuffle(data)
+		train, valid, test = self.shuffle(self.data)
 		self.save_data(train, 'train')
 		self.save_data(valid, 'validation')
 		self.save_data(test, 'test')

@@ -66,39 +66,52 @@ Wednesday_reduced = drop_attacks(Wednesday)
 Thursday_reduced = drop_attacks(Thursday)
 Friday_reduced = drop_attacks(Friday)
 
-all_train_reduced = pd.concat([Monday, Tuesday_reduced, Wednesday_reduced], axis = 0)
-all_valid_reduced = pd.concat([Thursday_reduced], axis = 0)
-all_test_reduced = pd.concat([Friday_reduced], axis = 0)
+#all_train_reduced = pd.concat([Monday, Tuesday_reduced, Wednesday_reduced], axis = 0)
+#all_valid_reduced = pd.concat([Thursday_reduced], axis = 0)
+#all_test_reduced = pd.concat([Friday_reduced], axis = 0)
 
+all_reduced = pd.concat([Monday, Tuesday_reduced, Wednesday_reduced, Thursday_reduced, Friday_reduced], axis = 0)
 
 features_select = ['num_label', 'NumPkts', 'NumBytes', 'PktSizeAvg', 'PktSizeStd', 'NumACK', 'ULNumPkts', 'ULNumBytes', 'ULNumACK', 'DLNumPkts', 'DLNumBytes', 'DLPktSizeAvg', 'DLPktSizeStd', 'DLNumUniIPAddr', 'DLNumACK', 'DLPktSizeP25', 'PktSizeP75', 'DLPktSizeP75', 'ULnumActiveFlows', 'DLnumActiveFlows']
 
-alltrainreduced_select_new = clean_data(all_train_reduced)[features_select]
-allvalidreduced_select_new = clean_data(all_valid_reduced)[features_select]
-alltestreduced_select_new = clean_data(all_test_reduced)[features_select]
+#alltrainreduced_select_new = clean_data(all_train_reduced)[features_select]
+#allvalidreduced_select_new = clean_data(all_valid_reduced)[features_select]
+#alltestreduced_select_new = clean_data(all_test_reduced)[features_select]
+
+allreduced_select_new = clean_data(all_reduced)[features_select]
 
 #pdb.set_trace()
 
-raw_labels_train =  all_train_reduced[['Label']].values
-raw_labels_valid =  all_valid_reduced[['Label']].values
-raw_labels_test =  all_test_reduced[['Label']].values
+#raw_labels_train =  all_train_reduced[['Label']].values
+#raw_labels_valid =  all_valid_reduced[['Label']].values
+#raw_labels_test =  all_test_reduced[['Label']].values
 
-normed_train = store_normed(alltrainreduced_select_new)
-normed_valid = store_normed(allvalidreduced_select_new)
-normed_test = store_normed (alltestreduced_select_new )
+raw_labels =  all_reduced[['Label']].values
+
+#normed_train = store_normed(alltrainreduced_select_new)
+#normed_valid = store_normed(allvalidreduced_select_new)
+#normed_test = store_normed (alltestreduced_select_new )
+
+normed_all = store_normed(allreduced_select_new)
 #pdb.set_trace()
 
-slide_train = create_windows(normed_train, 10, 9) 
-slide_valid = create_windows(normed_valid, 10, 9) 
-slide_test = create_windows(normed_test, 10, 9) 
+#slide_train = create_windows(normed_train, 10, 9) 
+#slide_valid = create_windows(normed_valid, 10, 9) 
+#slide_test = create_windows(normed_test, 10, 9) 
 
-slide_string_labels_train = create_windows_raw_label(raw_labels_train, 10, 9) 
-slide_string_labels_valid = create_windows_raw_label(raw_labels_valid, 10, 9) 
-slide_string_labels_test = create_windows_raw_label(raw_labels_test, 10, 9) 
+slide_all = create_windows(normed_all, 10, 9) 
+
+#slide_string_labels_train = create_windows_raw_label(raw_labels_train, 10, 9) 
+#slide_string_labels_valid = create_windows_raw_label(raw_labels_valid, 10, 9) 
+#slide_string_labels_test = create_windows_raw_label(raw_labels_test, 10, 9) 
+
+slide_string_labels = create_windows_raw_label(raw_labels, 10, 9) 
 
 print ('\n shuffling...')
 
-Shuffle(slide_string_labels_train, slide_string_labels_valid, slide_string_labels_test).output_attack_idx()
-Shuffle(slide_train, slide_valid, slide_test).output_data()
+#Shuffle(slide_string_labels_train, slide_string_labels_valid, slide_string_labels_test).output_attack_idx()
+#Shuffle(slide_train, slide_valid, slide_test).output_data()
 
+Shuffle(slide_string_labels).output_attack_idx()
+Shuffle(slide_all).output_data()
 

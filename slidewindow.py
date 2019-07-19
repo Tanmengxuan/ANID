@@ -18,11 +18,12 @@ def create_windows(fileName, window_size, overlap):
 	del origData
 	gc.collect()
 	print( "Creating a numpy ndarray")
-	np_windowed = np.array(windows_list)
+	np_windowed = np.array(windows_list) #create 3d array
+	#pdb.set_trace()
 	del windows_list
 	gc.collect()
 	
-	#pdb.set_trace()
+	
 
 	return np_windowed
 

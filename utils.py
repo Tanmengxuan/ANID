@@ -1,12 +1,25 @@
+import matplotlib
+matplotlib.use('Agg')
 import tensorflow as tf
 import pdb
-from keras import backend as K 
 import numpy as np
 import pandas as pd
-import pdb
 from sklearn.metrics import precision_recall_fscore_support, roc_curve, auc, precision_score, recall_score, f1_score, accuracy_score, confusion_matrix
-import matplotlib
 import matplotlib.pyplot as plt
+import h5py
+import glob
+import re
+
+def output_layer(outputs, num_hidden, num_classes):
+
+	final_output = tf.layers.dense(
+			inputs= outputs,
+			units= num_classes,
+			activation= tf.nn.softmax,
+			name="output_layer")
+
+	
+	return final_output
 
 def weighted_crossentropy(y_true, y_pred):
 	output = y_pred
@@ -22,116 +35,62 @@ def weighted_crossentropy(y_true, y_pred):
 	xent = - tf.reduce_mean(loss)
 	return xent
 
-def weighted_crossentropy_nn(y_true, y_pred):
-	#pdb.set_trace()
-	output = y_pred
-	output /= tf.reduce_sum(y_pred, -1, True)
-	output = tf.clip_by_value(output, 1e-5, 1. - 1e-5)
-	#xent = - tf.reduce_sum(y_true * tf.log(output), -1)
-	# pos_weight = 5.87
-	# xent *= y_true[:,:,1] * pos_weight + y_true[:,:,0] * 1
-	#xent *=   y_true[:,:,1] * (tf.cast(tf.reduce_sum(y_true[:, :, 0]), tf.float32) / tf.reduce_sum(y_true[:, :, 1])) + y_true[:, :, 0] * 1 
-	pos_weight = tf.cast(tf.reduce_sum(y_true[:, 0]), tf.float32) / (tf.reduce_sum(y_true[:, 1]) + 1e-5)
-	loss = y_true[:,1]*pos_weight*tf.log(output)[:,1] + y_true[:,0]*1*tf.log(output)[:,0]
-	xent = - tf.reduce_mean(loss)
-	return xent
-
-def weighted_categorical_crossentropy(weights):
-    """
-    A weighted version of keras.objectives.categorical_crossentropy
-    
-    Variables:
-        weights: numpy array of shape (C,) where C is the number of classes
-    
-    Usage:
-        weights = np.array([0.5,2,10]) # Class one at 0.5, class 2 twice the normal weights, class 3 10x.
-        loss = weighted_categorical_crossentropy(weights)
-        model.compile(loss=loss,optimizer='adam')
-    """
-    
-    weights = K.variable(weights)
-        
-    def loss(y_true, y_pred):
-        # scale predictions so that the class probas of each sample sum to 1
-        y_pred /= K.sum(y_pred, axis=-1, keepdims=True)
-        # clip to prevent NaN's and Inf's
-        y_pred = K.clip(y_pred, K.epsilon(), 1 - K.epsilon())
-        # calc
-        loss = y_true * K.log(y_pred) * weights
-        loss = -K.sum(loss, -1)
-        return loss
-    
-    return loss
-
-def softmax(x, axis=1):
-    """Softmax activation function.
-    # Arguments
-        x : Tensor.
-        axis: Integer, axis along which the softmax normalization is applied.
-    # Returns
-        Tensor, output of softmax transformation.
-    # Raises
-        ValueError: In case `dim(x) == 1`.
-    """
-    ndim = K.ndim(x)
-    if ndim == 2:
-        return K.softmax(x)
-    elif ndim > 2:
-        e = K.exp(x - K.max(x, axis=axis, keepdims=True))
-        s = K.sum(e, axis=axis, keepdims=True)
-        return e / s
-    else:
-        raise ValueError('Cannot apply softmax to a tensor that is 1D')
-
 def get_result(test_pred, testY, threshold):
-    
-	#pred = test_pred.reshape(-1, test_pred.shape[2])
-	pred = test_pred > threshold
+	#pdb.set_trace()
+	pred = test_pred.reshape(-1, test_pred.shape[2])
+	pred = pred > threshold
 	pred = pred.astype(int)
-	pred_pd = pd.DataFrame(pred)
-	pred_pd.rename(columns = {0:"pred_nonattack", 1:"pred_attack"}, inplace = True)
 	
-	#targ = testY.reshape( -1, testY.shape[2])
-	targ_pd = pd.DataFrame(testY)
-	targ_pd.rename(columns = {0:"targ_nonattack", 1:"targ_attack"}, inplace = True)
-	
-	combined_pd = pd.concat([pred_pd, targ_pd], axis=1, join_axes=[pred_pd.index])
-	final_pd = combined_pd.drop(combined_pd[(combined_pd.targ_nonattack == 0.0) & (combined_pd.targ_attack == 0.0)].index)
-	pred = final_pd.iloc[:, :2].copy()
-	targ = final_pd.iloc[:, 2:].copy()
-	_test_precision,_test_recall,_test_f1,_support = precision_recall_fscore_support(targ, pred)
-	#import pdb
-	#pdb.set_trace()	
-	
-	pred_attack = pred.iloc[:, 1].copy()
-	targ_attack = targ.iloc[:, 1].copy()
+	targ = testY.reshape( -1, testY.shape[2])
 
-	acc = accuracy_score(targ_attack, pred_attack)
+	pred_attack = pred[:, 1]
+	targ_attack = targ[:, 1]
 	conf = confusion_matrix(targ_attack, pred_attack)
-	#import pdb
-	#pdb.set_trace()	
-	#print "threshold: ", threshold
-	#print conf
-	#print "\n"
-	tn, fp, fn, tp = conf.ravel()
-
-	fpr = float(fp) / (fp + tn + 1e-10)
-	fnr = float(fn)/ (fn + tp + 1e-10)
-
-	far = (fpr + fnr) / 2
-	#print conf
-	return _test_precision, _test_recall, _test_f1, _support, acc, far 
-
-def shuffle_data(data, label, pad_idx):
-    
-	idx = np.arange(len(data)) #create array of index for data
-	np.random.shuffle(idx) #randomly shuffle idx
 	
-	data = data[idx]
-	label = label[idx]
-	pad_idx = pad_idx[idx]
+	_test_precision,_test_recall,_test_f1,_support = precision_recall_fscore_support(targ, pred)
 	
-	return data, label,pad_idx
+	return _test_precision, _test_recall, _test_f1, _support, pred, targ, conf
+
+def plot_performance(train_loss, val_loss, train_f1, val_f1, title):
+
+	labels = [ "train_loss", "val_loss", "train_f1", "val_f1" ]
+	
+	plot_data = dict()
+	plot_data["train_loss"] = train_loss
+	plot_data["val_loss"] = val_loss
+	plot_data["train_f1"] = train_f1
+	plot_data["val_f1"] = val_f1
+	
+	
+	fig, ax = plt.subplots(figsize = (10,8))
+	for metric in labels:
+		ax.plot( np.arange(len(plot_data[metric])) , np.array(plot_data[metric]), label=metric)
+	ax.legend()
+	ax.set_ylim(0.0, 1)
+	plt.title(title)
+	plt.xlabel('no. of epoch')
+	fig.savefig('/home/tmx/cisdem/CrossFire-Detect/models/plot_train/' + title + '.png')
+	#plt.show()
+
+def plot_performance_crf(train_loss, val_loss, val_f1, title):
+
+	labels = [ "train_loss", "val_loss", "val_f1" ]
+	
+	plot_data = dict()
+	plot_data["train_loss"] = train_loss
+	plot_data["val_loss"] = val_loss
+	plot_data["val_f1"] = val_f1
+	
+	
+	fig, ax = plt.subplots(figsize = (10,8))
+	for metric in labels:
+		ax.plot( np.arange(len(plot_data[metric])) , np.array(plot_data[metric]), label=metric)
+	ax.legend()
+	#ax.set_ylim(0.0, 1)
+	plt.title(title)
+	plt.xlabel('no. of epoch')
+	fig.savefig('/home/tmx/cisdem/CrossFire-Detect/models/plot_train/' + title + '.png')
+	#plt.show()
 
 def shuffle_fixed_data(data, label):
     
@@ -142,62 +101,162 @@ def shuffle_fixed_data(data, label):
 	
 	return data, label
 
-def plot_precision(test_pred, test_targ, title):
+def get_total_para(trainable_variables):
 
-	labels = ['precision', 'recall', 'accuracy', 'FAR']	
-	precision = []
-	recall = []
-	accuracy = []
-	FAR = []
+	total_parameters = 0
+	for variable in trainable_variables:
+		shape = variable.get_shape()
+		variable_parameters = 1
 
-	thresholds = np.arange(0.999955, 1., 0.0000001)
-	for threshold in thresholds:
-		_test_precision,_test_recall,_test_f1,_support,acc,far = get_result(test_pred, test_targ, threshold)
+		for dim in shape:
+			variable_parameters *= dim.value
+
+		total_parameters += variable_parameters
+	print('total_parameters: ', total_parameters)
+
+class Inputter(object):
+
+	def __init__(self, filepathGlob):
 		
-		precision.append(_test_precision[1])
-		recall.append(_test_recall[1])
-		accuracy.append(acc)
-		FAR.append(far)
+		files = glob.glob(filepathGlob)
 
-	plot_data = dict()
-	plot_data["precision"] = precision 
-	plot_data["recall"] = recall
-	plot_data["accuracy"] = accuracy 
-	plot_data["FAR"] = FAR 
+		for dataFile in files:
+			if re.search(r'test\.*', dataFile):
+				self.testFile = dataFile
+				print ('test file read: ', dataFile)
 
-	#import pdb
-	#pdb.set_trace()
-	fig, ax = plt.subplots(figsize = (10,8))		
-	for label in labels:
-		ax.plot(thresholds, np.array(plot_data[label]), label=label)	
+			elif re.search(r'train\.*', dataFile):
+				self.trainFile = dataFile
+				print ('train file read: ', dataFile)
 
-	ax.legend()
-	plt.title(title)
-	plt.xlabel('threshold')
-	plt.show(block=False)
-	fig.savefig('unsw.png')
-	raw_input("Press Enter to Exit")
+			elif re.search(r'valid\.*', dataFile):
+				self.validFile = dataFile
+				print ('valid file read: ', dataFile)
 
-def plot_training(val_loss, val_acc, val_far, train_loss, train_acc, title):
+	def load_data(self, name):
 
-	labels = ['val_loss', 'val_acc', 'val_far', 'train_loss', 'train_acc']	
+		file_path = getattr(self, name + 'File')		
+		inputX = h5py.File(file_path, 'r').get('data')[:]
+		inputY = h5py.File(file_path, 'r').get('label')[:]
 
-	plot_data = dict()
-	plot_data["val_loss"] = val_loss 
-	plot_data["val_acc"] = val_acc
-	plot_data["val_far"] = val_far 
-	plot_data["train_loss"] = train_loss 
-	plot_data["train_acc"] = train_acc 
+		print ('\n {} data shape: {} {}'.format(name, inputX.shape, inputY.shape))
 
-	#import pdb
-	#pdb.set_trace()
-	fig, ax = plt.subplots(figsize = (10,8))		
-	for label in labels:
-		ax.plot(np.arange(len(plot_data[label])), np.array(plot_data[label]), label=label)	
+		return inputX, inputY
 
-	ax.legend()
-	plt.title(title)
-	plt.xlabel('no. of epochs')
-	plt.show(block=False)
-	raw_input("Press Enter to Exit")
+class Create_batch(object):
+	
+	def __init__(self, data, label, batch_size):
+
+		self.data = data
+		self.label = label
+		self.batch_size = batch_size
+		self.start_index = 0
+
+	def get_num_batch(self):
+
+		num_batch = int(len(self.data)/self.batch_size) + min( len(self.data)%self.batch_size, 1)
+		return num_batch
+
+	def nextbatch(self):
+
+		try:
+			batch_x = self.data[self.start_index : self.start_index + self.batch_size]
+			batch_y = self.label[self.start_index : self.start_index + self.batch_size]
+		except:
+			batch_x = self.data[self.start_index: ]
+			batch_y = self.label[self.start_index: ]
+
+		self.start_index += self.batch_size
+
+		return batch_x, batch_y
+
+class Attacks(object):
+
+	def __init__(self, attack_type):
+		
+		self.attack_type = attack_type
+		#self.attack_idx = h5py.File('h5files/test_allattack_idx.h5', 'r').get(self.attack_type)[:]
+		self.attack_idx = h5py.File('/home/tmx/cicids_alfonso/test_new_allattack_idx.h5', 'r').get(self.attack_type)[:]
+		self.threshold = 0.5
+		self.tp = 0
+		self.fp = 0
+		self.tn = 0
+		self.fn = 0
+		self.N_attacks = 6049.0 # total number of attack samples in testset
+
+	def compute_all_attacks(self, fp_all, test_pred, testY):
+
+		_, _, _, tp, fp, tn, fn = self.compute_fnr(fp_all, self.attack_idx, test_pred, testY, self.threshold)
+
+		self.tp += tp
+		self.fp += fp
+		self.tn += tn
+		self.fn += fn
+
+
+	def compute_fnr(self, fp_all, idx_list, test_pred, testY, threshold):
+	
+		#pdb.set_trace()
+		test_pred_attack = test_pred[idx_list, :, :]
+		testY_attack = testY[idx_list, :, :]
+
+		_test_precision,_test_recall,_test_f1,_support, pred, targ, conf = get_result(test_pred_attack, testY_attack, threshold)
+		
+		recall = _test_recall[1]
+
+		tp = conf[1][1]
+		n_i = conf[1][0] + conf[1][1] # total attack_i samples = fn + tp
+		precision,fp = self.compute_prec_attack( tp, n_i, self.N_attacks, fp_all)  
+
+		f1 = (2 * recall * precision) / (recall + precision) 
+
+		tn = conf[0][0]
+		fn = conf[1][0]
+		#return precision, recall, f1
+		return precision, recall, f1, tp, fp, tn, fn 
+
+	def compute_prec_attack(self, tp, n_i, N_attacks, fp_all):
+
+		fp = fp_all * (n_i/N_attacks) # fp is proportional to the % of that attack
+		prec = tp /( tp + fp)
+
+		#return prec
+		return prec,fp
+
+
+	def get_result(self):
+
+		prec = self.tp / (self.tp + self.fp)
+		rec = self.tp/(self.tp + self.fn)
+		f1 = 2*prec*rec / (prec + rec)
+		
+		print ( '\n Attack: {}, f1: {:.4f}, prec: {:.4f}, rec: {:.4f}'.format(self.attack_type, f1, prec, rec))
+
+class Multi(object):
+
+	def __init__(self):
+
+		self.tp = 0
+		self.fp = 0
+		self.tn = 0
+		self.fn = 0
+
+	def compute(self, conf):
+
+		self.tp += conf[1][1]
+		self.fp += conf[0][1]
+		self.tn += conf[0][0] 
+		self.fn += conf[1][0]
+
+	def get_result(self):
+
+		prec = self.tp / (self.tp + self.fp)
+		rec = self.tp/(self.tp + self.fn)
+		f1 = 2*prec*rec / (prec + rec)
+		fpr = self.fp / (self.fp + self.tn)
+		
+		print ( '\n Final f1: {:.4f}, prec: {:.4f}, rec: {:.4f}, fpr: {:.4f}'.format(f1, prec, rec, fpr))
+
+
+
 
