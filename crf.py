@@ -1,7 +1,7 @@
 import tensorflow as tf
 from keras.backend.tensorflow_backend import set_session
 config = tf.ConfigProto()
-config.gpu_options.per_process_gpu_memory_fraction = 0.1
+config.gpu_options.per_process_gpu_memory_fraction = 0.25
 set_session(tf.Session(config=config))
 
 
@@ -117,7 +117,7 @@ testX, testY = data.load_data('test')
 model_name = 'crf3.h5'
 save_path = 'lstm_runs/cicids/wedattack/new_features/' + model_name
 
-#train_crf(trainX, trainY, validX, validY, save_path)
+train_crf(trainX, trainY, validX, validY, save_path)
 
 
 custom_objects={'CRF': CRF,
