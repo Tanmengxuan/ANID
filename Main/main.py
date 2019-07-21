@@ -14,8 +14,8 @@ from absl import app
 
 import pdb
 
-import attention_main as att
-import bilstm_main as bi
+import attention as att
+import bilstm as bi
 
 import h5py
 
@@ -215,8 +215,8 @@ def main(unused_args):
 			threshold = 0.5
 			_test_precision,_test_recall,_test_f1,_support, pred, targ, conf = get_result(test_pred, testY, threshold)
 			print ('\n')
-			print (" - test_f1: (%f,%f) - test_precision: (%f,%f) - test_recall (%f,%f) - test_support(%f,%f)" % \
-			(_test_f1[0],_test_f1[1], _test_precision[0],_test_precision[1], _test_recall[0],_test_recall[1], _support[0],_support[1]))
+			print (" - test_f1: %f - test_precision: %f - test_recall %f " % \
+			(_test_f1[1], _test_precision[1], _test_recall[1]))
 			print (conf)
 
 			print ('atten:{}, keep_prob:{}, hidden_size:{}, features:{}, seq_len:{}, epoch:{}, batch:{}, model:{}, threshold:{}'\
@@ -247,8 +247,8 @@ def main(unused_args):
 						threshold = 0.5
 						_test_precision,_test_recall,_test_f1,_support, pred, targ, conf = get_result(test_pred, testY, threshold)
 						print ('\n')
-						print (" - test_f1: (%f,%f) - test_precision: (%f,%f) - test_recall (%f,%f) - test_support(%f,%f)" % \
-						(_test_f1[0],_test_f1[1], _test_precision[0],_test_precision[1], _test_recall[0],_test_recall[1], _support[0],_support[1]))
+						print (" - test_f1: %f - test_precision: %f - test_recall %f " % \
+						(_test_f1[1], _test_precision[1], _test_recall[1]))
 						print (conf)
 						
 						multi.compute(conf)

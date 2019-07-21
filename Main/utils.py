@@ -65,7 +65,7 @@ def plot_performance(train_loss, val_loss, train_f1, val_f1, title):
 	ax.set_ylim(0.0, 1)
 	plt.title(title)
 	plt.xlabel('no. of epoch')
-	fig.savefig('plot_train/' + title + '.png')
+	fig.savefig('../plot_train/' + title + '.png')
 	#plt.show()
 
 def plot_performance_crf(train_loss, val_loss, val_f1, title):
@@ -85,7 +85,7 @@ def plot_performance_crf(train_loss, val_loss, val_f1, title):
 	#ax.set_ylim(0.0, 1)
 	plt.title(title)
 	plt.xlabel('no. of epoch')
-	fig.savefig('plot_train/' + title + '.png')
+	fig.savefig('../plot_train/' + title + '.png')
 	#plt.show()
 
 def shuffle_fixed_data(data, label):

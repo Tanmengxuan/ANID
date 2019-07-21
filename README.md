@@ -1,4 +1,8 @@
-# cicids2017
+# ANID 
+
+
+![anid](images/anid.png)
+
 
 Shape of data : (num of samples, window length, feature size)
 
