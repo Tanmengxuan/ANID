@@ -35,7 +35,7 @@ flags.DEFINE_integer("num_features", 19, "feature size of input")
 flags.DEFINE_integer("seq_len", 10, "window size of input data")
 
 # Training parameters
-flags.DEFINE_integer("num_epoch", 50, "number of training epochs")
+flags.DEFINE_integer("num_epoch", 3000, "number of training epochs")
 flags.DEFINE_integer("batch_size", 256, "batch size of training datasets")
 
 # Paths
