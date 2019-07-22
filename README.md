@@ -16,6 +16,6 @@ The ANID is a simple feed-forward network that does sequence-to-sequence predict
 Block diagram of the ANID model:
 
 <div>
-<img src="https://raw.githubusercontent.com/Tanmengxuan/ANID/master/images/anid.png" alt="anid" width="200px" height="550px" style="display: block;">
+<img src="https://raw.githubusercontent.com/Tanmengxuan/ANID/master/images/anid.png" alt="anid" width="whatever" height="550px" align="center" style="display: block;">
 </div>
 
