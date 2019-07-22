@@ -30,17 +30,17 @@ def pos_encoding(input_x, keep_prob, num_hidden, MAXLEN):
 					name = 'input_dense')
 	
 	positional_encoding = tf.Variable(
-						initial_value = tf.zeros((1, MAXLEN, num_hidden)),
-						trainable = True,
-						dtype = tf.float32,
-						name = 'pos_encoding')
+				initial_value = tf.zeros((1, MAXLEN, num_hidden)),
+				trainable = True,
+				dtype = tf.float32,
+				name = 'pos_encoding')
 	
 	positional_input = embedded_input + positional_encoding
 	
 	positional_input = tf.nn.dropout(
-						positional_input,
-						keep_prob,
-						name = "sum_positional_dropout")
+				positional_input,
+				keep_prob,
+				name = "sum_positional_dropout")
 	
 	return positional_input
 
