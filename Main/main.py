@@ -55,10 +55,10 @@ def evaluate_test(testX, testY,Input_X, Input_Y, keep_prob, sess, loss, final_ou
 		mini_test_x, mini_test_y = get_test_batch.nextbatch()
 
 		test_loss, test_pred = sess.run([loss, final_output], 
-										  feed_dict={Input_X: mini_test_x,
-													 Input_Y: mini_test_y,
-													 keep_prob: 1.0,
-													 })
+										feed_dict={Input_X: mini_test_x,
+												Input_Y: mini_test_y,
+												keep_prob: 1.0,
+												})
 		test_batch_loss += test_loss
 
 		if batch == 0:
@@ -148,9 +148,9 @@ def main(unused_args):
 
 					train_loss, train_pred = sess.run([loss, final_output],
 												feed_dict={Input_X: minibatch_x,
-															Input_Y: minibatch_y,
-															keep_prob: 1.0,
-															})
+												Input_Y: minibatch_y,
+												keep_prob: 1.0,
+												})
 					threshold = 0.5	
 					_train_precision,_train_recall,_train_f1,_support,_,_,_ = get_result(train_pred, minibatch_y, threshold)
 					batch_loss += train_loss
