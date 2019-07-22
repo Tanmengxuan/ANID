@@ -19,3 +19,4 @@ Block diagram of the ANID model:
 <img src="https://raw.githubusercontent.com/Tanmengxuan/ANID/master/images/anid.png" alt="anid" width="whatever" height="550px" align="center" style="display: block;">
 </div>
 
+<p align="center"><img src="images/anid.png" alt="anid." width="whatever" height="580px" align="center" style="display: block; margin:auto;"></p>
