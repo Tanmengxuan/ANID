@@ -1,49 +1,21 @@
 # ANID 
 
+Experiments for the paper:
 
-![anid](images/anid.png)
+**"A Neural Attention Model for Real-Time Network Intrusion Detection"** *2019 IEEE Conference on Local Computer Networks*.
+(*Camera-ready version of the paper will be uploaded soon*)
 
+Special thanks and acknowledgement to [@greentfrapp](https://github.com/greentfrapp/attention-primer) for his implementation of
+the self-attention mechanism!
 
-Shape of data : (num of samples, window length, feature size)
+## Model Description
 
-Shape of label: (num of samples, window length, num of class)
+The Attention for Network Intrusion Detection (ANID) model draws inspiration from the transformer model by [Vaswani et al. (2017)](https://arxiv.org/abs/1706.03762).
+The ANID is a simple feed-forward network that does sequence-to-sequence predictions without the encoder-decoder structure used in the transformer.
 
-num of class = 2
+Block diagram of the ANID model:
 
-flags:
+<div>
+<img src="https://raw.githubusercontent.com/Tanmengxuan/ANID/master/images/anid.png" alt="anid" width="200px" height="550px" style="display: block;">
+</div>
 
---train : train the model
-
---num_feature : feature size
-
---MAXLEN : window length
-
---drop: the amount of probability to keep in dropout ( from 0.0 to 1.0 )
-
---num_hidden: size of network
-
---num_epoch: number of epochs for training
-
---atten: whether or not to use attention
-
---model_name: name of saved model
-
---test: test the saved model specify in --model_name
-
-example command to run cicids.py
-
-python cicids.py --train --num_features 19 --MAXLEN 10 --drop 0.9 --num_hidden 100 --num_epoch 50 --atten --model_name cicids25 --test
-
-# Preprocess data
-
-1) python feature_select.py
-
-2) python L2_normalization.py --path allreducedselect_w10o0_\*
-
-3) python slidewindow.py --path normed_allreducedselect_w10o0_train.csv  --window 10 --overlap 9 --name train
-
- python slidewindow.py --path normed_allreducedselect_w10o0_validation.csv  --window 10 --overlap 9 --name validation
-
- python slidewindow.py --path normed_allreducedselect_w10o0_test.csv  --window 10 --overlap 9 --name test
-
-4) python shuffle_data.py
