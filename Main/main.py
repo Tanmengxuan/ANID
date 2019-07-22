@@ -105,7 +105,7 @@ def main(unused_args):
 	val_f1_list = []
 	
 
-	gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.30)	
+	gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.30)
 	config = tf.ConfigProto(
 
 			device_count = {'GPU': 1},
@@ -136,20 +136,20 @@ def main(unused_args):
 				shuffled_x, shuffled_y  = shuffle_fixed_data(trainX, trainY)
 				get_batch = Create_batch(shuffled_x, shuffled_y, FLAGS.batch_size)
 				num_batch = get_batch.get_num_batch()
-		
-				batch_loss = 0	
-				batch_f1 = 0	
+
+				batch_loss = 0
+				batch_f1 = 0
 				for batch in range(num_batch):
 					minibatch_x, minibatch_y = get_batch.nextbatch()
-					sess.run(train_op, feed_dict={Input_X: minibatch_x, 
-												  Input_Y: minibatch_y, 
-												  keep_prob: FLAGS.drop,
+					sess.run(train_op, feed_dict={Input_X: minibatch_x,
+												Input_Y: minibatch_y,
+												keep_prob: FLAGS.drop,
 												})
 
-					train_loss, train_pred = sess.run([loss, final_output], 
-												  feed_dict={Input_X: minibatch_x,
-															 Input_Y: minibatch_y,
-															 keep_prob: 1.0,
+					train_loss, train_pred = sess.run([loss, final_output],
+												feed_dict={Input_X: minibatch_x,
+															Input_Y: minibatch_y,
+															keep_prob: 1.0,
 															})
 					threshold = 0.5	
 					_train_precision,_train_recall,_train_f1,_support,_,_,_ = get_result(train_pred, minibatch_y, threshold)
@@ -158,8 +158,8 @@ def main(unused_args):
 
 				train_loss = batch_loss/num_batch
 				train_f1 = batch_f1/num_batch
-												  
-				valid_loss, valid_pred = evaluate_test(validX, validY,Input_X, Input_Y, keep_prob,sess, loss, final_output)	
+
+				valid_loss, valid_pred = evaluate_test(validX, validY,Input_X, Input_Y, keep_prob,sess, loss, final_output)
 				_valid_precision,_valid_recall,_valid_f1,_support,_,_,_ = get_result(valid_pred, validY, threshold)
 				
 				if _valid_f1[1] > max_valid_f1:
@@ -172,7 +172,7 @@ def main(unused_args):
 				val_f1_list .append(_valid_f1[1])
 				
 				now = datetime.now()
-				print ("\nEpoch {}/{} - {:.1f}s".format(epoch, FLAGS.num_epoch, (now - past).total_seconds())) 
+				print ("\nEpoch {}/{} - {:.1f}s".format(epoch, FLAGS.num_epoch, (now - past).total_seconds()))
 				
 				print ("train_loss: {:.6f} ".format(train_loss))
 				print ("val_loss: {:.6f} ".format(valid_loss))
@@ -209,7 +209,7 @@ def main(unused_args):
 			get_total_para(tf.trainable_variables())
 			start_time_init = time.time()
 
-			_, test_pred =  evaluate_test(testX, testY,Input_X, Input_Y, keep_prob,sess, loss, final_output)	
+			_, test_pred =  evaluate_test(testX, testY,Input_X, Input_Y, keep_prob,sess, loss, final_output)
 
 			print ('time for inference: ', time.time() - start_time_init)
 			threshold = 0.5
@@ -227,7 +227,7 @@ def main(unused_args):
 			if FLAGS.test_multi:
 
 				multi = Multi()
-				models_list = ['cicids74', 'cicids94', 'cicids95', 'cicids96', 'cicids97', 'cicids98', 'cicids99', 'cicids100', 'cicids101', 'cicids102']	
+				models_list = ['cicids74', 'cicids94', 'cicids95', 'cicids96', 'cicids97', 'cicids98', 'cicids99', 'cicids100', 'cicids101', 'cicids102']
 				#models_list = [FLAGS.model_name]
 
 				attack_list = ['dos', 'ddos', 'infl', 'brute', 'port', 'web', 'botnet']

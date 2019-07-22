@@ -27,7 +27,7 @@ The models are built using Tensorflow 1.8.0, Python 3.5.2 and tested in Ubuntu 1
 
 *A docker image with all the supporting software packages will be uploaded soon*
 
-## Executing the Experiments 
+## Running the Experiments 
 
 Please follow the steps below to run the experiments.
 More specifically, the data has to be preprocessed by the scripts in `Preprocess/`
@@ -35,15 +35,15 @@ before they can be trained or evaluated using the models in `Main/`.
 
 ### Data Preprocessing
 
-1. Download the time slot-based Network Intrusion dataset here that are being preprocessed
-from the raw Cicids2017 pcap files.
+1. Download the [time slot-based Network Intrusion dataset](https://drive.google.com/file/d/1CJIOMOXjrAh9l09Qr_Y9aTSFzRFUknpf/view) that are being preprocessed
+from the raw [Cicids2017](https://www.unb.ca/cic/datasets/ids-2017.html) pcap files.
 2. Create a `data/` folder and transfer all 5 downloaded csv files in.
 3. Change directory to `Preprocess/` and run the `process.py` script:
 ```
 $ cd Preprocess/
 $ python process.py
 ```
-This will output the following preprocessed files in `data/`:
+This will output the following eprocessed files in the `data/` folder:
 
 ```python3
 
@@ -71,7 +71,7 @@ To train the ANID model on the `normed_w10o9_train` dataset, change directory to
 ```
 $ python main.py --train --model_name <checkpoint name> --atten  
 ```
-This trains an ANID model with parameters reported in the paper:
+This trains an ANID model with hyperparameters reported in the paper:
 
 - Training epochs: `--epoch 3000`
 - Mini batch size: `--batch_size 256`

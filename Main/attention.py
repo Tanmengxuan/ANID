@@ -40,7 +40,7 @@ def pos_encoding(input_x, keep_prob, num_hidden, MAXLEN):
 	positional_input = tf.nn.dropout(
 						positional_input,
 						keep_prob,
-						name = "sum_positional_dropout") 
+						name = "sum_positional_dropout")
 
 	return positional_input
 
@@ -106,8 +106,7 @@ def ffn_2(encoding, num_hidden):
 	return encoding
 
 def sda(encoding, num_hidden, initial_input, MAXLEN, keep_prob):
-
-
+	
 	decoder_input = tf.Variable(
 					initial_value = np.zeros((1, MAXLEN, num_hidden)),
 					trainable=True,
@@ -133,8 +132,7 @@ def sda(encoding, num_hidden, initial_input, MAXLEN, keep_prob):
 
 
 def sda_2(encoding, num_hidden, initial_input, MAXLEN, keep_prob):
-
-
+	
 	decoder_input = tf.Variable(
 					initial_value = np.zeros((1, MAXLEN, num_hidden)),
 					trainable=True,
