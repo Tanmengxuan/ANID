@@ -43,7 +43,7 @@ from the raw [Cicids2017](https://www.unb.ca/cic/datasets/ids-2017.html) pcap fi
 $ cd Preprocess/
 $ python process.py
 ```
-This will output the following eprocessed files in the `data/` folder:
+This will output the following processed files in the `data/` folder:
 
 ```python3
 
@@ -104,11 +104,3 @@ are saved in the `train_records/` folder.
 The plot below shows the losses and F1 scores on the two datasets when training an ANID model and a baseline Bi-LSTM model:
 
 <p align="center"><img src="images/training_records.png" alt="records" width="whatever" height="whatever" align="center" style="display: block; margin:auto;"></p>
-
-
-
-
-
-
-
-
