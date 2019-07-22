@@ -28,20 +28,20 @@ def pos_encoding(input_x, keep_prob, num_hidden, MAXLEN):
 					units = num_hidden,
 					activation = None,
 					name = 'input_dense')
-
+	
 	positional_encoding = tf.Variable(
 						initial_value = tf.zeros((1, MAXLEN, num_hidden)),
 						trainable = True,
 						dtype = tf.float32,
 						name = 'pos_encoding')
-
+	
 	positional_input = embedded_input + positional_encoding
-
+	
 	positional_input = tf.nn.dropout(
 						positional_input,
 						keep_prob,
 						name = "sum_positional_dropout")
-
+	
 	return positional_input
 
 
@@ -116,14 +116,14 @@ def sda(encoding, num_hidden, initial_input, MAXLEN, keep_prob):
 	 )
 				
 	print ("sda_query", decoder_input)
-
+	
 	decoded, decoder_attention_weights = attention(
 	tf.tile(decoder_input, multiples=tf.concat(([tf.shape(initial_input)[0]], [1], [1]), axis=0)),
 	encoding,
 	encoding,
 	keep_prob,
 	)
-
+	
 				
 	print ("sda_out", decoded)
 	print ("sda_out_weights", decoder_attention_weights)
@@ -142,15 +142,15 @@ def sda_2(encoding, num_hidden, initial_input, MAXLEN, keep_prob):
 	 )
 				
 	print ("sda_query_2", decoder_input)
-
+	
 	decoded, decoder_attention_weights = attention(
 	tf.tile(decoder_input, multiples=tf.concat(([tf.shape(initial_input)[0]], [1], [1]), axis=0)),
 	encoding,
 	encoding,
 	keep_prob,
 	)
-
-				
+	
+	
 	print ("sda_out_2", decoded)
 	print ("sda_out_weights_2", decoder_attention_weights)
 	
