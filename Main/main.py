@@ -227,8 +227,8 @@ def main(unused_args):
 			if FLAGS.test_multi:
 
 				multi = Multi()
-				models_list = ['cicids74', 'cicids94', 'cicids95', 'cicids96', 'cicids97', 'cicids98', 'cicids99', 'cicids100', 'cicids101', 'cicids102']
-				#models_list = [FLAGS.model_name]
+				#models_list = ['cicids74', 'cicids94', 'cicids95', 'cicids96', 'cicids97', 'cicids98', 'cicids99', 'cicids100', 'cicids101', 'cicids102']
+				models_list = [FLAGS.model_name]
 
 				attack_list = ['dos', 'ddos', 'infl', 'brute', 'port', 'web', 'botnet']
 				obj_list = []
