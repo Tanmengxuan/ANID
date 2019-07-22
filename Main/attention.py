@@ -24,10 +24,10 @@ def pos_encoding(input_x, keep_prob, num_hidden, MAXLEN):
 
 	#pass initial input through dense to become embedded
 	embedded_input = tf.layers.dense(
-					inputs = input_x,
-					units = num_hidden,
-					activation = None,
-					name = 'input_dense')
+				inputs = input_x,
+				units = num_hidden,
+				activation = None,
+				name = 'input_dense')
 	
 	positional_encoding = tf.Variable(
 				initial_value = tf.zeros((1, MAXLEN, num_hidden)),
@@ -108,11 +108,11 @@ def ffn_2(encoding, num_hidden):
 def sda(encoding, num_hidden, initial_input, MAXLEN, keep_prob):
 	
 	decoder_input = tf.Variable(
-					initial_value = np.zeros((1, MAXLEN, num_hidden)),
-					trainable=True,
-					dtype=tf.float32,
-					name="sda_query",
-					#name="decoder_input",
+				initial_value = np.zeros((1, MAXLEN, num_hidden)),
+				trainable=True,
+				dtype=tf.float32,
+				name="sda_query",
+				#name="decoder_input",
 	 )
 				
 	print ("sda_query", decoder_input)
@@ -134,11 +134,11 @@ def sda(encoding, num_hidden, initial_input, MAXLEN, keep_prob):
 def sda_2(encoding, num_hidden, initial_input, MAXLEN, keep_prob):
 	
 	decoder_input = tf.Variable(
-					initial_value = np.zeros((1, MAXLEN, num_hidden)),
-					trainable=True,
-					dtype=tf.float32,
-					name="sda_query_2",
-					#name="decoder_input",
+				initial_value = np.zeros((1, MAXLEN, num_hidden)),
+				trainable=True,
+				dtype=tf.float32,
+				name="sda_query_2",
+				#name="decoder_input",
 	 )
 				
 	print ("sda_query_2", decoder_input)
