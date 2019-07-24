@@ -44,54 +44,69 @@ flags.DEFINE_string("save_path", "../checkpoints/", "path of saved model")
 flags.DEFINE_string("input_path", "../data/normed_w10o9_*",
 "input path of data") 
 
-def evaluate_test(testX, testY,Input_X, Input_Y, keep_prob, sess, loss, final_output):
+class ANID(object):
 
-	get_test_batch = Create_batch(testX, testY, FLAGS.batch_size)
-	num_test_batch = get_test_batch.get_num_batch()
+	'''A class to build the ANID model'''
 
-	#pdb.set_trace()
-	test_batch_loss = 0
-	for batch in range(num_test_batch):
-		mini_test_x, mini_test_y = get_test_batch.nextbatch()
+	def __init__(self, num_classes, Input_X, num_hidden, seq_len, keep_prob):
 
-		test_loss, test_pred = sess.run([loss, final_output], 
-							feed_dict={Input_X: mini_test_x,
-							Input_Y: mini_test_y,
-							keep_prob: 1.0,
-							})
-		test_batch_loss += test_loss
+		self.num_classes = num_classes
+		self.Input_X = Input_X
+		self.num_hidden = num_hidden
+		self.seq_len = seq_len
+		self.keep_prob = keep_prob
 
-		if batch == 0:
-			test_pred_init = test_pred
-		else:
-			test_pred_init = np.concatenate([test_pred_init, test_pred], axis =0)
+	def positional_encoding(self):
+		
+		return att.pos_encoding(self.Input_X, self.num_hidden, self.seq_len, self.keep_prob)
 
-	#pdb.set_trace()	
-	test_batch_loss = test_batch_loss/num_test_batch		
+	def attention_modules(self):
 
-	return test_batch_loss, test_pred_init
+		modules_output, enc_attention_weights, dec_attention_weights = att.apply_attention(self.positional_encoding(), self.Input_X, self.num_hidden, self.seq_len)
+
+		return modules_output
+
+	def output_layer(self, outputs, num_classes):
+
+		final_output = tf.layers.dense(
+				inputs= outputs,
+				units= num_classes,
+				activation= tf.nn.softmax,
+				name="output_layer")
+
+		return final_output
+
+	def final_output(self):
+
+		return self.output_layer(self.attention_modules(), self.num_classes) 
+
+class BILSTM(ANID):
+
+	'''A class to build the baseline bi-lstm model'''
+
+	def bilstm_model(self):
+
+		return bi.bi_lstm(self.Input_X, self.num_hidden, self.seq_len, self.keep_prob)
+
+	def final_output(self):
+
+		return self.output_layer(self.bilstm_model(), self.num_classes) 
+
 
 def main(unused_args):
-	#pdb.set_trace()
 
 	num_classes = 2
-	
 	tf.reset_default_graph()
 	Input_X = tf.placeholder( tf.float32, [None, FLAGS.seq_len, FLAGS.num_features])
 	Input_Y = tf.placeholder( tf.float32, [None, FLAGS.seq_len, num_classes])
 	keep_prob = tf.placeholder(tf.float32, name='keep_prob')
 
 	if FLAGS.atten:
-		#pdb.set_trace()
-		model_output_pos = att.pos_encoding(Input_X, keep_prob, FLAGS.anid_hidden, FLAGS.seq_len)
-		model_output, enc_attention_weights, dec_attention_weights = att.apply_attention(Input_X, model_output_pos, FLAGS.anid_hidden, FLAGS.seq_len, keep_prob)
+		final_output = ANID(num_classes, Input_X, FLAGS.anid_hidden, FLAGS.seq_len, keep_prob).final_output()
 
 	elif FLAGS.bilstm:
-		model_output = bi.bi_lstm(Input_X, FLAGS.bilstm_hidden, FLAGS.seq_len, keep_prob)	
+		final_output = BILSTM(num_classes, Input_X, FLAGS.bilstm_hidden, FLAGS.seq_len, keep_prob).final_output()	
 
-	num_hidden = FLAGS.anid_hidden if FLAGS.atten else FLAGS.bilstm_hidden
-	final_output = output_layer(model_output, num_hidden, num_classes)
-	
 	loss= weighted_crossentropy(Input_Y, final_output)
 	optimizer = tf.train.AdamOptimizer(learning_rate=0.001)
 	train_op = optimizer.minimize(loss)
@@ -113,7 +128,6 @@ def main(unused_args):
 		)
 	
 	if FLAGS.train:	
-		#pdb.set_trace()
 
 		data = Inputter(FLAGS.input_path)
 		trainX, trainY = data.load_data('train')
@@ -159,7 +173,7 @@ def main(unused_args):
 				train_loss = batch_loss/num_batch
 				train_f1 = batch_f1/num_batch
 
-				valid_loss, valid_pred = evaluate_test(validX, validY,Input_X, Input_Y, keep_prob,sess, loss, final_output)
+				valid_loss, valid_pred = evaluate_test(validX, validY,Input_X, Input_Y, keep_prob,sess, loss, final_output, FLAGS.batch_size)
 				_valid_precision,_valid_recall,_valid_f1,_support,_,_,_ = get_result(valid_pred, validY, threshold)
 				
 				if _valid_f1[1] > max_valid_f1:
@@ -198,18 +212,19 @@ def main(unused_args):
 
 		data = Inputter(FLAGS.input_path)
 		testX, testY = data.load_data('test')
+		num_hidden = FLAGS.anid_hidden if FLAGS.atten else FLAGS.bilstm_hidden
 
 		#config = tf.ConfigProto(
 		#	device_count = {'GPU': 1}
 		#	)
-		
 		with tf.Session(config= config) as sess:
 			saver.restore(sess,FLAGS.save_path + FLAGS.model_name)
 			#print (tf.trainable_variables())
 			get_total_para(tf.trainable_variables())
+			test_sample(sess, testX, Input_X, keep_prob, final_output) 
 			start_time_init = time.time()
 
-			_, test_pred =  evaluate_test(testX, testY,Input_X, Input_Y, keep_prob,sess, loss, final_output)
+			_, test_pred =  evaluate_test(testX, testY,Input_X, Input_Y, keep_prob,sess, loss, final_output, FLAGS.batch_size)
 
 			print ('time for inference: ', time.time() - start_time_init)
 			threshold = 0.5
@@ -241,7 +256,7 @@ def main(unused_args):
 						saver.restore(sess,FLAGS.save_path + model_name)
 						start_time = time.time()
 
-						_, test_pred = evaluate_test(testX, testY,Input_X, Input_Y, keep_prob,sess, loss, final_output)
+						_, test_pred = evaluate_test(testX, testY,Input_X, Input_Y, keep_prob,sess, loss, final_output, FLAGS.batch_size)
 						
 						print ('time for inference: ', time.time() - start_time)
 						threshold = 0.5

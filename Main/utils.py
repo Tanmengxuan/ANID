@@ -9,17 +9,7 @@ import matplotlib.pyplot as plt
 import h5py
 import glob
 import re
-
-def output_layer(outputs, num_hidden, num_classes):
-
-	final_output = tf.layers.dense(
-			inputs= outputs,
-			units= num_classes,
-			activation= tf.nn.softmax,
-			name="output_layer")
-
-	
-	return final_output
+from datetime import datetime
 
 def weighted_crossentropy(y_true, y_pred):
 
@@ -31,8 +21,39 @@ def weighted_crossentropy(y_true, y_pred):
 	xent = - tf.reduce_mean(loss)
 	return xent
 
-def get_result(test_pred, testY, threshold):
+def evaluate_test(testX, testY,Input_X, Input_Y, keep_prob, sess, loss, final_output, batch_size):
+
+	'''function used to do inference on validation and test datasets'''
+
+	get_test_batch = Create_batch(testX, testY, batch_size)
+	num_test_batch = get_test_batch.get_num_batch()
+
 	#pdb.set_trace()
+	test_batch_loss = 0
+	for batch in range(num_test_batch):
+		mini_test_x, mini_test_y = get_test_batch.nextbatch()
+
+		test_loss, test_pred = sess.run([loss, final_output], 
+							feed_dict={Input_X: mini_test_x,
+							Input_Y: mini_test_y,
+							keep_prob: 1.0,
+							})
+		test_batch_loss += test_loss
+
+		if batch == 0:
+			test_pred_init = test_pred
+		else:
+			test_pred_init = np.concatenate([test_pred_init, test_pred], axis =0)
+
+	#pdb.set_trace()	
+	test_batch_loss = test_batch_loss/num_test_batch		
+
+	return test_batch_loss, test_pred_init
+
+def get_result(test_pred, testY, threshold):
+
+	'''function used to compute F1 scores''' 
+
 	pred = test_pred.reshape(-1, test_pred.shape[2])
 	pred = pred > threshold
 	pred = pred.astype(int)
@@ -109,6 +130,17 @@ def get_total_para(trainable_variables):
 
 		total_parameters += variable_parameters
 	print('total_parameters: ', total_parameters)
+
+def test_sample(sess, testX, Input_X, keep_prob, final_output):
+
+	'''function used to compute inference time of a single sample'''
+
+	one_sample = testX[[0], :, :]
+	past = datetime.now()
+	prediction = sess.run([final_output],
+						feed_dict = {Input_X: one_sample,
+									keep_prob:1.0})
+	print ("test time one sample {:.5f}s".format(( datetime.now() - past).total_seconds())) 
 
 class Inputter(object):
 

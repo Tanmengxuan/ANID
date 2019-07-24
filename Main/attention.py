@@ -3,7 +3,7 @@ import numpy as np
 import h5py
 import pdb
 
-def attention(query, key, value, keep_prob):
+def attention(query, key, value):
 
 	# Equation 1 in Vaswani et al. (2017)
 	# 	Scaled dot product between Query and Keys
@@ -21,7 +21,7 @@ def attention(query, key, value, keep_prob):
 	return output, attention_weights
 
 
-def pos_encoding(input_x, keep_prob, num_hidden, MAXLEN):
+def pos_encoding(input_x, num_hidden, seq_len, keep_prob):
 
 	#pass initial input through dense to become embedded
 	embedded_input = tf.layers.dense(
@@ -32,7 +32,7 @@ def pos_encoding(input_x, keep_prob, num_hidden, MAXLEN):
 
 	#giving inputs positional information
 	positional_encoding = tf.Variable(
-				initial_value = tf.zeros((1, MAXLEN, num_hidden)),
+				initial_value = tf.zeros((1, seq_len, num_hidden)),
 				trainable = True,
 				dtype = tf.float32,
 				name = 'pos_encoding')
@@ -47,11 +47,11 @@ def pos_encoding(input_x, keep_prob, num_hidden, MAXLEN):
 	return positional_input
 
 
-def sdsa(encoding, keep_prob):
+def sdsa(encoding):
 	
 	'''SDSA module'''
 
-	encoding, enc_attention_weights = attention(encoding, encoding, encoding, keep_prob)
+	encoding, enc_attention_weights = attention(encoding, encoding, encoding)
 
 	print ("sdsa_out", encoding)
 
@@ -83,12 +83,12 @@ def ffn(encoding, num_hidden):
 
 	return encoding
 
-def sda(encoding, num_hidden, initial_input, MAXLEN, keep_prob):
+def sda(encoding, num_hidden, initial_input, seq_len):
 
 	'''SDA module'''
 
 	decoder_input = tf.Variable(
-				initial_value = np.zeros((1, MAXLEN, num_hidden)),
+				initial_value = np.zeros((1, seq_len, num_hidden)),
 				trainable=True,
 				dtype=tf.float32,
 				name="sda_query",
@@ -100,7 +100,6 @@ def sda(encoding, num_hidden, initial_input, MAXLEN, keep_prob):
 	tf.tile(decoder_input, multiples=tf.concat(([tf.shape(initial_input)[0]], [1], [1]), axis=0)),
 	encoding,
 	encoding,
-	keep_prob,
 	)
 	
 				
@@ -110,11 +109,12 @@ def sda(encoding, num_hidden, initial_input, MAXLEN, keep_prob):
 	return decoded, decoder_attention_weights
 
 
-def apply_attention(initial_input, model_output, num_hidden, maxlen, keep_prob):
+def apply_attention(model_output, initial_input, num_hidden, seq_len):
 
 	''' a function which can be used for combination study'''
+
 	ffn_out = ffn(model_output, num_hidden)
-	sda_out, sda_attention_weights = sda(ffn_out, num_hidden, initial_input, maxlen, keep_prob)
-	sdsa_out, sdsa_attention_weights = sdsa(sda_out, keep_prob)
+	sda_out, sda_attention_weights = sda(ffn_out, num_hidden, initial_input, seq_len)
+	sdsa_out, sdsa_attention_weights = sdsa(sda_out)
 
 	return sdsa_out, sdsa_attention_weights, sda_attention_weights
